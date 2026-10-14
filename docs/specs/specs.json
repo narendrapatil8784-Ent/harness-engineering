@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "seeded": [
+    "react"
+  ],
+  "seeded_files": [
+    "react/api-surface.md"
+  ],
+  "specs": [
+    {
+      "file": "react/verified-facts.md",
+      "description": "react: deep-scan approved facts, each citing the file that proves it.",
+      "stacks": [
+        "react"
+      ]
+    },
+    {
+      "file": "react/project-structure.md",
+      "description": "react: source-tree layout, module boundaries, entry points — read before adding files.",
+      "stacks": [
+        "react"
+      ]
+    },
+    {
+      "file": "react/architecture.md",
+      "description": "react: allowed import directions and forbidden cross-layer calls.",
+      "stacks": [
+        "react"
+      ]
+    },
+    {
+      "file": "react/conventions.md",
+      "description": "react: idioms, error handling, anti-patterns, BAD/GOOD examples, stack-specific sections.",
+      "stacks": [
+        "react"
+      ]
+    },
+    {
+      "file": "react/api-surface.md",
+      "description": "react: endpoints, commands and events this stack already exposes — check before adding one.",
+      "stacks": [
+        "react"
+      ]
+    }
+  ]
+}

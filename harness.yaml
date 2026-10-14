@@ -1,0 +1,26 @@
+apiVersion: harness.dev/v1
+kind: Harness
+template_version: 0.1.0
+project:
+  name: mstreet-shopping-cart
+  description: "mstreet-shopping-cart harness"
+stacks:
+  - id: react
+    framework: react
+    version: 18.3.1
+    package_manager: npm
+    paths:
+      - frontend/**
+integrations:
+  doc_tracker: local
+  issue_tracker: none
+  design: none
+  vcs: github
+  ci: github-actions
+governance:
+  profile:
+    - standard
+permissions:
+  allow_extra: []
+targets:
+  - claude-code

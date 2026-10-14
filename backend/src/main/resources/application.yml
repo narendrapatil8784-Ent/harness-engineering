@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:mystreetdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    defer-datasource-initialization: true
+    show-sql: false
+    open-in-view: false
+  sql:
+    init:
+      mode: always
+
+app:
+  jwt:
+    secret: myStreetSuperSecretKeyForJWTSigning2025WithEnoughBitsForHS256
+    expiration-ms: 3600000
+
+server:
+  port: 8080

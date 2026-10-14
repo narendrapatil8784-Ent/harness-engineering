@@ -1,0 +1,111 @@
+# Harness merge-gate status check.
+#
+# The PR checklist written by the implement / develop-feature commands is prose —
+# a ticked box is an assertion, not evidence. The evidence lives in the two-tier
+# state contract (docs/state/features.json + docs/features/<id>/state.json).
+# This workflow runs `harness gates <id>`, which reads that state and fails the
+# check unless every required gate has recorded a passing literal.
+#
+# Team-owned: Harness writes this file once and never overwrites your edits on
+# regenerate. Set `integrations.ci: none` in harness.yaml to stop emitting it.
+#
+# The feature id comes from the branch name (`feature/<id>` — the branch
+# /arh-implement pushes), falling back to the first `<EPIC>-<SEQ>` token in the
+# branch name or PR title. When no id can be found the job reports a notice and
+# skips the check rather than passing silently.
+#
+# BEFORE THIS WORKFLOW CAN RUN: fill the "Install the Harness CLI" step below.
+# It ships as an unfilled scaffold slot, so `harness audit --strict` fails until
+# you do, and the job itself fails with an explicit message rather than
+# installing something wrong.
+name: harness gates
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  gates:
+    name: merge gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # ---------------------------------------------------------------------
+      # TODO: replace the `run:` body below with how YOUR team installs the
+      # Harness CLI. Harness cannot fill this in — how the CLI reaches a runner
+      # is a per-project decision. Pick one:
+      #
+      #   git ref (what this repo's own README documents):
+      #     pip install "git+https://github.com/Apexon-Enterprise-org/agent-rise-foundry.git@<tag>"
+      #
+      #   internal package index:
+      #     pip install --index-url https://<your-index>/simple harness==<version>
+      #
+      #   pre-built wheel from an artefact store:
+      #     pip install ./ci-artifacts/harness-<version>-py3-none-any.whl
+      #
+      # DO NOT use `pip install harness` against public PyPI. The name `harness`
+      # on PyPI belongs to an unrelated third-party project
+      # (github.com/vmagamedov/harness — "language-neutral meta-framework for
+      # server-less style services"), NOT this CLI. Installing it would pull a
+      # stranger's package into your CI and would not provide the `harness`
+      # command this workflow needs.
+      # ---------------------------------------------------------------------
+      - name: Install the Harness CLI
+        run: |
+          echo "::error file=.github/workflows/harness-gates.yml::The 'Install the Harness CLI' step is an unfilled TODO slot."
+          echo ""
+          echo "Edit .github/workflows/harness-gates.yml and replace this step's"
+          echo "run: body with however your team installs the Harness CLI —"
+          echo "a git ref, an internal package index, or a pre-built wheel."
+          echo "See the comment directly above this step for each form."
+          echo ""
+          echo "Do NOT use 'pip install harness' from public PyPI: that name"
+          echo "belongs to an unrelated project and is not this CLI."
+          exit 1
+
+      - name: Resolve feature id
+        id: feature
+        env:
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          set -euo pipefail
+          id=""
+          case "$BRANCH" in
+            feature/*) id="${BRANCH#feature/}" ;;
+          esac
+          if [ -z "$id" ]; then
+            id="$(printf '%s %s' "$BRANCH" "$PR_TITLE" \
+                  | grep -oE '[A-Z][A-Z0-9]*-[0-9]+' | head -n 1 || true)"
+          fi
+          if [ -z "$id" ]; then
+            echo "::notice::no feature id in branch '$BRANCH' or PR title — skipping gate check"
+          else
+            echo "feature id: $id"
+          fi
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+
+      - name: Check merge gates
+        if: steps.feature.outputs.id != ''
+        run: harness gates "${{ steps.feature.outputs.id }}"
+
+      - name: Gate report (JSON)
+        if: always() && steps.feature.outputs.id != ''
+        run: harness gates "${{ steps.feature.outputs.id }}" --json > gates.json || true
+
+      - name: Upload gate report
+        if: always() && steps.feature.outputs.id != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: harness-gates
+          path: gates.json
+          if-no-files-found: ignore

@@ -1,0 +1,36 @@
+# Node / Frontend
+node_modules/
+dist/
+dist-ssr/
+.vite/
+*.local
+
+# Maven / Backend
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.*
+
+# JaCoCo
+*.exec
